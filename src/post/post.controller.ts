@@ -38,8 +38,10 @@ class PostController {
 
       const userIdQuery = user_id ? `user_id=${user_id}` : null;
       const titleQuery = title ? `title like '%${title}%'` : null;
-      const likesQuery = likes ? `likes>=${likes}` : null;
-      const dislikesQuery = dislikes ? `dislikes>=${dislikes}` : null;
+      const likesQuery = likes ? `array_length(liked_by, 1)>=${likes}` : null;
+      const dislikesQuery = dislikes
+        ? `array_length(disliked_by,1)>=${dislikes}`
+        : null;
 
       queryString += joinQueryParams([
         userIdQuery,
@@ -54,7 +56,30 @@ class PostController {
         `select * from uni.users_posts ${queryString} limit 5 offset ${offset}`
       );
 
-      res.status(200).json({ data: rows });
+      const { rows: allRows } = await db.query(
+        `select * from uni.users_posts ${queryString}`
+      );
+
+      res.status(200).json({ data: rows, total: allRows.length });
+    } catch (error) {
+      res.status(400).json({ message: "error" });
+    }
+  }
+
+  async likePost(req: Request, res: Response) {
+    const postId = req.body.postId;
+    const userId = req.body.userId;
+    const mode = req.body.mode;
+
+    try {
+      await db.query(
+        `UPDATE uni.users_posts
+      SET liked_by = array_${mode}(liked_by, $1)
+      WHERE id = $2;`,
+        [userId, postId]
+      );
+
+      res.status(200).json({ message: "success" });
     } catch (error) {
       res.status(400).json({ message: "error" });
     }
