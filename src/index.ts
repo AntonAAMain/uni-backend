@@ -3,7 +3,9 @@ import { Request, Response } from "express";
 const express = require("express");
 const { pool } = require("./db");
 const cors = require("cors");
+
 const authRouter = require("./auth/auth.router");
+const postRouter = require("./post/post.router");
 
 const PORT = 8000;
 const app = express();
@@ -11,6 +13,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(authRouter);
+app.use(postRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.json("hello");
