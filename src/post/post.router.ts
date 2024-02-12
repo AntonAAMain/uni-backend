@@ -8,6 +8,8 @@ const postController = require("./post.controller");
 
 router.post("/profile/post", postController.createPost);
 router.get("/profile/posts", postController.getPosts);
-router.post("/post/like", postController.likePost);
+router.post("/post/rate", postController.ratePost);
+router.patch("/profile/post/update", postController.changePost);
+router.post("/profile/post/delete", postController.deletePost);
 
 module.exports = router;

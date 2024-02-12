@@ -66,15 +66,16 @@ class PostController {
     }
   }
 
-  async likePost(req: Request, res: Response) {
+  async ratePost(req: Request, res: Response) {
     const postId = req.body.postId;
     const userId = req.body.userId;
+    const type = req.body.type;
     const mode = req.body.mode;
 
     try {
       await db.query(
         `UPDATE uni.users_posts
-      SET liked_by = array_${mode}(liked_by, $1)
+      SET ${type} = array_${mode}(${type}, $1)
       WHERE id = $2;`,
         [userId, postId]
       );
@@ -82,6 +83,36 @@ class PostController {
       res.status(200).json({ message: "success" });
     } catch (error) {
       res.status(400).json({ message: "error" });
+    }
+  }
+
+  async changePost(req: Request, res: Response) {
+    const postId = req.body.postId;
+    const postTitle = req.body.title;
+    const postText = req.body.text;
+
+    try {
+      await db.query(
+        `update uni.users_posts set title=$1, text=$2 where id=$3`,
+        [postTitle, postText, postId]
+      );
+
+      res.status(200).json({ message: "success" });
+    } catch (error) {
+      res.status(422).json({ message: "validation error" });
+    }
+  }
+
+  async deletePost(req: Request, res: Response) {
+    const postId = req.body.postId;
+
+    try {
+      await db.query(`
+        delete  from uni.users_posts where id=${postId}`);
+
+      res.status(200).json({ message: "success" });
+    } catch (error) {
+      res.status(400).json(error);
     }
   }
 }
