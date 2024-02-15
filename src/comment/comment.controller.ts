@@ -13,9 +13,13 @@ class CommentController {
     const postId = req.body.postId;
 
     try {
+      const { rows } = await db.query(
+        `select * from uni.users where id=${userId}`
+      );
+
       await db.query(
         `insert into uni.posts_comments values ($1, DEFAULT, $2, $3, $4)`,
-        [userId, text, postId, userName]
+        [userId, text, postId, rows[0].name]
       );
 
       res.status(200).json({ message: "success" });
